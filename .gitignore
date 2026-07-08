@@ -2,5 +2,7 @@ __pycache__/
 *.pyc
 *.egg-info/
 .venv/
-peerpedia.db
+dist/
+build/
+*.db
 articles/

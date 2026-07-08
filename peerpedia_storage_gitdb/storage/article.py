@@ -6,7 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from peerpedia_core.protocols.storage import ArticleStorage
-from peerpedia_core.types.entities import Article, ArticleId, Review, ReviewId, Scores, UserId
+from peerpedia_core.types.entities import Article, ArticleId, Review, ReviewId, Scores
 
 from peerpedia_storage_gitdb.git.guards import require_article_repo
 from peerpedia_storage_gitdb.git.ops import read_article_source

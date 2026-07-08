@@ -261,3 +261,123 @@ def test_content_bundle_sync(articles_dir, db_url):
     assert v.id is not None
 
     dispose_engine(db_url)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Corrupted bundle
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def test_ingest_bundle_corrupted(articles_dir, db_url):
+    """Corrupted bundle raises ValueError, not silent corruption."""
+    storage = build_storage(articles_dir, db_url)
+    content = storage.content
+    aid = ArticleId(id="art-bundle-bad")
+    content.create(aid, "markdown")
+    with pytest.raises(ValueError, match="Invalid bundle"):
+        content.ingest_bundle(aid, b"not-a-git-bundle")
+    dispose_engine(db_url)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Incremental bundle
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def test_bundle_incremental_since_version(articles_dir, db_url):
+    """create_bundle with since= produces a smaller bundle."""
+    storage = build_storage(articles_dir, db_url)
+    content = storage.content
+    aid = ArticleId(id="art-incr")
+
+    v1 = content.create(aid, "markdown")
+    incr = content.create_bundle(aid, since=v1)
+    full = content.create_bundle(aid)
+    assert len(incr) < len(full), "incremental bundle should be smaller than full"
+    assert len(incr) > 0
+
+    dispose_engine(db_url)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Content storage edge cases
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def test_content_not_found(articles_dir, db_url):
+    """read() on non-existent repo raises error."""
+    storage = build_storage(articles_dir, db_url)
+    content = storage.content
+    aid = ArticleId(id="art-nonexistent")
+    with pytest.raises(Exception):
+        content.read(aid)
+    dispose_engine(db_url)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Update review through lifecycle
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def test_update_review_through_lifecycle(storage, lifecycle):
+    """create → revise → publish → review → update review."""
+    aid = execute("create", {}, None, lifecycle)
+    article = Article(id=aid, title="Update Review", status="draft", authors=("Charlie",))
+    execute("revise", {"content": "# Update Review", "article": article}, aid, lifecycle)
+    pub_meta = Article(id=aid, title="Update Review", status="published", authors=("Charlie",))
+    execute("publish", {"article": pub_meta}, aid, lifecycle)
+
+    uid = UserId(id="reviewer-update")
+    review = Review(
+        id=ReviewId(id="ru1"), article_id=aid, reviewer_id=uid,
+        scores=Scores(dimensions={"clarity": 3.0}),
+    )
+    execute("review", {
+        "review": review,
+        "scores": json.dumps({"clarity": 3.0}),
+    }, aid, lifecycle)
+
+    # Update the review
+    updated_review = Review(
+        id=ReviewId(id="ru1"), article_id=aid, reviewer_id=uid,
+        scores=Scores(dimensions={"clarity": 5.0}),
+    )
+    storage.update_review(aid, uid, Scores(dimensions={"clarity": 5.0}))
+
+    reviews = storage.review_meta.list(aid)
+    assert len(reviews) == 1
+    assert reviews[0].scores.get("clarity") == 5.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Empty query
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def test_empty_article_query(articles_dir, db_url):
+    """query() with no articles returns empty list."""
+    storage = build_storage(articles_dir, db_url)
+    result = storage.meta.query()
+    assert result == []
+    dispose_engine(db_url)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# User search edge cases
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def test_user_list_and_search_edge_cases(user_storage):
+    """Empty search, special-char characters in name."""
+    # Empty search returns all
+    uid1 = user_storage.create()
+    user_storage.update(uid1, User(id=uid1, name="Alice"))
+    uid2 = user_storage.create()
+    user_storage.update(uid2, User(id=uid2, name="Bob"))
+    uid3 = user_storage.create()
+    user_storage.update(uid3, User(id=uid3, name="A%_special"))
+
+    assert len(user_storage.search("")) == 3
+    assert len(user_storage.search("Nonexistent")) == 0
+    assert len(user_storage.search("special")) == 1
+    assert len(user_storage.search("Alice")) == 1

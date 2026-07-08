@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, String
 
 from peerpedia_core.types.entities import Article, ArticleId, Review, ReviewId, Scores, User, UserId
 from peerpedia_storage_gitdb.db.engine import Base, JSONType

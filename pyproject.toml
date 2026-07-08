@@ -8,7 +8,7 @@ authors = [
     {name = "Chenqi Meng", email = "chenqimeng@example.com"},
 ]
 dependencies = [
-    "peerpedia-core>=0.1.0",
+    "peerpedia-core>=0.2.0",
     "sqlalchemy>=2.0",
     "gitpython>=3.1",
 ]

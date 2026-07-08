@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import time
 import uuid
-from pathlib import Path
 
 from peerpedia_core.exceptions import NotFoundError
 from peerpedia_core.types.entities import Article, ArticleId, Version

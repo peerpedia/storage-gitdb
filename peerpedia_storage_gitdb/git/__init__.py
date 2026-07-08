@@ -5,8 +5,6 @@
 
 from peerpedia_storage_gitdb.git.guards import require_article_repo
 from peerpedia_storage_gitdb.git.ops import (
-    article_filename,
-    article_format_to_ext,
     commit_article,
     delete_article_repo,
     get_commit_history,
@@ -17,8 +15,6 @@ from peerpedia_storage_gitdb.git.ops import (
 )
 
 __all__ = [
-    "article_filename",
-    "article_format_to_ext",
     "commit_article",
     "delete_article_repo",
     "get_commit_history",

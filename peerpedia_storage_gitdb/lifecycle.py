@@ -13,7 +13,7 @@ import json
 
 from peerpedia_core.exceptions import BadRequestError
 from peerpedia_core.protocols.lifecycle import Extra, Evaluation
-from peerpedia_core.types.entities import Article, ArticleId, Review
+from peerpedia_core.types.entities import Article, Review
 from peerpedia_core.types.scores import Scores
 from peerpedia_core.protocols.storage import ArticleStorage
 
