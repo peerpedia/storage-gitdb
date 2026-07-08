@@ -1,6 +1,6 @@
 [project]
 name = "peerpedia-storage-gitdb"
-version = "0.2.0"
+version = "0.2.1"
 description = "PeerPedia Storage GitDB — git + SQLite implementation of ArticleStorage"
 requires-python = ">=3.11"
 license = "AGPL-3.0"

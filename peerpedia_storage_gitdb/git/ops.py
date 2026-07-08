@@ -23,6 +23,12 @@ ARTICLE_EXTENSIONS = ("md", "typ")
 _EXT_TO_FORMAT = {"md": "markdown", "typ": "typst"}
 _FORMAT_TO_EXT = {"markdown": "md", "typst": "typ"}
 
+# ── Git identity fallback (CI runners have no git config) ──
+os.environ.setdefault("GIT_COMMITTER_NAME", "PeerPedia")
+os.environ.setdefault("GIT_COMMITTER_EMAIL", "noreply@peerpedia")
+os.environ.setdefault("GIT_AUTHOR_NAME", "PeerPedia")
+os.environ.setdefault("GIT_AUTHOR_EMAIL", "noreply@peerpedia")
+
 _ARTICLE_GITIGNORE = "__pycache__/\n*.pyc\n.DS_Store\n*.tmp\n*.swp\n"
 
 
